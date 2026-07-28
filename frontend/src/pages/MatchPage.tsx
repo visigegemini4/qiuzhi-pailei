@@ -58,7 +58,7 @@ export default function MatchPage() {
             <div>
               <label className="block mb-2" style={{ fontSize: 14, fontWeight: 500 }}>可接受加班</label>
               <select className="ds-select" value={userPreferences.overtimeTolerance} onChange={(e) => setUserPreferences({ ...userPreferences, overtimeTolerance: e.target.value })}>
-                <option>不接受</option><option>偶尔(月均<10h)</option><option>适度(月均10-20h)</option><option>经常(月均20h+)</option><option>高强度无所谓</option>
+                <option>不接受</option><option>偶尔(月均{'<'}10h)</option><option>适度(月均10-20h)</option><option>经常(月均20h+)</option><option>高强度无所谓</option>
               </select>
             </div>
             <button className="ds-btn ds-btn--brand ds-btn--lg" onClick={() => setAnalyzed(true)}>分析匹配度</button>
