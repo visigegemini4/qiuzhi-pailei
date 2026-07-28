@@ -1,6 +1,6 @@
 services:
-  - name: qiuzhi-pailei-api
-    type: web
+  - type: web
+    name: qiuzhi-pailei-api
     runtime: node
     rootDir: backend
     buildCommand: npm install && npm run build
@@ -8,8 +8,4 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 3000
-      - key: DEEPSEEK_API_KEY
-        sync: false
     healthCheckPath: /api/health
