@@ -27,22 +27,18 @@ function extractSource(link: string): string {
   }
 }
 
-async function searchBaidu(query: string): Promise<SearchResult[]> {
+async function searchDuckDuckGo(query: string): Promise<SearchResult[]> {
   await delay(randomBetween(1000, 2500));
 
   return withRetry(async () => {
-    const response = await axios.get('https://www.baidu.com/s', {
-      params: {
-        wd: query,
-        rn: 20,
-      },
+    const response = await axios.get('https://html.duckduckgo.com/html/', {
+      params: { q: query },
       headers: {
         'User-Agent': getRandomUA(),
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
         'Accept-Encoding': 'gzip, deflate, br',
         'Connection': 'keep-alive',
-        'Cache-Control': 'max-age=0',
       },
       timeout: 15000,
       maxRedirects: 5,
@@ -51,69 +47,35 @@ async function searchBaidu(query: string): Promise<SearchResult[]> {
     const html: string = response.data;
     const results: SearchResult[] = [];
 
-    const sDataRegex = /<!--s-data:(\{[\s\S]*?\})-->/g;
+    // Parse DuckDuckGo HTML results
+    const resultRegex = /<div class="result results_links[^"]*"[^>]*>[\s\S]*?<h2 class="result__title"[^>]*>[\s\S]*?<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<\/h2>[\s\S]*?<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<\/div>/g;
     let match;
-    while ((match = sDataRegex.exec(html)) !== null) {
-      try {
-        const data = JSON.parse(match[1]);
-        if (data.mainItem) {
-          const { title, summary, urlParams } = data.mainItem;
-          const link = urlParams?.tcUrl || '';
-          if (title && summary && link && summary.length >= 10) {
-            results.push({
-              title: title.replace(/<[^>]+>/g, '').trim(),
-              snippet: summary.replace(/<[^>]+>/g, '').trim(),
-              link,
-              source: extractSource(link),
-            });
-          }
-        }
-        if (data.docList && Array.isArray(data.docList)) {
-          for (const doc of data.docList) {
-            if (doc.title && doc.summary && doc.urlParams?.tcUrl) {
-              const link = doc.urlParams.tcUrl;
-              if (doc.summary.length >= 10) {
-                results.push({
-                  title: doc.title.replace(/<[^>]+>/g, '').trim(),
-                  snippet: doc.summary.replace(/<[^>]+>/g, '').trim(),
-                  link,
-                  source: extractSource(link),
-                });
-              }
-            }
-          }
-        }
-      } catch {
-        continue;
-      }
-    }
-
-    const aTagRegex = /<a[^>]*class="cosc-title-a[^"]*"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
-    while ((match = aTagRegex.exec(html)) !== null) {
+    while ((match = resultRegex.exec(html)) !== null) {
       const link = match[1];
       const title = match[2].replace(/<[^>]+>/g, '').trim();
-      if (title && link && !results.some(r => r.title === title)) {
+      const snippet = match[3].replace(/<[^>]+>/g, '').trim();
+      if (title && snippet && snippet.length >= 10) {
         results.push({
           title,
-          snippet: title,
+          snippet,
           link,
           source: extractSource(link),
         });
       }
     }
 
-    const contentLeftMatch = html.match(/<div[^>]*id="content_left"[^>]*>([\s\S]*?)<\/div>/);
-    if (contentLeftMatch) {
-      const contentLeft = contentLeftMatch[1];
-      const abstractRegex = /<p[^>]*class="([^"]*c-abstract[^"]*)"[^>]*>([\s\S]*?)<\/p>/g;
-      while ((match = abstractRegex.exec(contentLeft)) !== null) {
-        const snippet = match[2].replace(/<[^>]+>/g, '').trim();
-        if (snippet.length >= 10) {
+    // Fallback: parse alternative DuckDuckGo result format
+    if (results.length === 0) {
+      const altRegex = /<div class="links_main[^"]*"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<\/div>/g;
+      while ((match = altRegex.exec(html)) !== null) {
+        const link = match[1];
+        const title = match[2].replace(/<[^>]+>/g, '').trim();
+        if (title && link) {
           results.push({
-            title: snippet.slice(0, 50),
-            snippet,
-            link: '',
-            source: '百度搜索',
+            title,
+            snippet: title,
+            link,
+            source: extractSource(link),
           });
         }
       }
@@ -137,7 +99,7 @@ export async function searchCompany(companyName: string): Promise<SearchResult[]
   for (let i = 0; i < queries.length; i++) {
     const query = queries[i];
     try {
-      const results = await searchBaidu(query);
+      const results = await searchDuckDuckGo(query);
       allResults.push(...results);
       if (i < queries.length - 1) {
         await delay(randomBetween(1500, 3000));
