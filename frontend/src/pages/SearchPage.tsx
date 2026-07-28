@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../data/AppContext';
 import { searchCompany, getProgress, getReport } from '../data/api';
-import type { ProgressData } from '../data/types';
+import type { ProgressData, ReportData } from '../data/types';
 
 const POLL_INTERVAL = 2000;
 
@@ -31,7 +31,7 @@ export default function SearchPage() {
     try {
       const { searchId } = await searchCompany(companyName, effectiveKey);
 
-      const report = await new Promise<ReturnType<typeof getReport>>((resolve, reject) => {
+      const report = await new Promise<ReportData>((resolve, reject) => {
         intervalRef.current = setInterval(async () => {
           try {
             const p = await getProgress(searchId);

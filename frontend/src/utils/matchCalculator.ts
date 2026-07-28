@@ -29,7 +29,10 @@ export function calculateMatchScore(scores: DimensionScores, preferences: UserPr
     { key: 'culture', label: '管理', match: checkGenericMatch(scores.culture), description: scores.culture >= 3.8 ? '管理风格评价整体正面' : scores.culture >= 3.2 ? '管理风格评价一般' : '管理风格存在较多负面评价' },
     { key: 'growth', label: '发展', match: checkGenericMatch(scores.growth), description: scores.growth >= 3.8 ? '晋升通道和成长空间评价良好' : scores.growth >= 3.2 ? '发展空间评价一般' : '职业发展空间有限' },
   ];
-  const totalScore = dimensions.reduce((sum, d) => sum + (d.match === 'match' ? 1.0 : d.match === 'partial' ? 0.6 : 0.0) * (weights[d.key] / 100), 0);
+  const totalScore = dimensions.reduce((sum, d) => {
+    const key = d.key as keyof WeightSettings;
+    return sum + (d.match === 'match' ? 1.0 : d.match === 'partial' ? 0.6 : 0.0) * (weights[key] / 100);
+  }, 0);
   const score = Math.round(totalScore * 100);
   return { score, label: score >= 70 ? '匹配' : score >= 50 ? '部分匹配' : '不匹配', dimensions };
 }
