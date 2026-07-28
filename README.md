@@ -77,7 +77,7 @@ npm run dev
 部署完成后：
 
 1. 复制 Render 后端的域名（类似 `xxx.onrender.com`）
-2. 在 Vercel 项目设置中添加环境变量 `VITE_API_BASE_URL`，值为后端地址
+2. 在 Vercel 前端项目的环境变量中添加 `VITE_API_BASE_URL`，值为后端地址
 3. Vercel 会自动重新部署
 
 ## 项目结构
