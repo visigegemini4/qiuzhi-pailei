@@ -2,6 +2,8 @@
 
 输入公司名称，AI 实时聚合多源口碑，生成结构化分析报告。
 
+🔗 **在线体验**：[https://qiuzhi-pailei.vercel.app](https://qiuzhi-pailei.vercel.app)
+
 ## 功能
 
 - 🔍 公司口碑搜索：聚合多个公开平台的员工评价
@@ -15,7 +17,7 @@
 - 前端：React + TypeScript + Vite + Tailwind CSS + ECharts
 - 后端：Node.js + Express + TypeScript
 - AI：DeepSeek API
-- 搜索：百度搜索（免 Key）
+- 搜索：DuckDuckGo（支持全球服务器，免 Key）
 
 ## 本地运行
 
@@ -59,7 +61,8 @@ npm run dev
 3. 点击 "Add New" → "Project"，选择你的仓库
 4. Framework Preset 选 "Vite"
 5. Root Directory 填 `frontend`
-6. 点击 "Deploy"，等待部署完成
+6. Environment Variables 添加：`VITE_API_BASE_URL` = 你的后端地址
+7. 点击 "Deploy"，等待部署完成
 
 ### 后端部署到 Render
 
@@ -67,8 +70,9 @@ npm run dev
 2. 点击 "New" → "Web Service"
 3. 选择你的仓库
 4. 配置：
-   - **Build Command**: `cd backend && npm install && npm run build`
-   - **Start Command**: `cd backend && npm start`
+   - **Root Directory**: `backend`
+   - **Build Command**: `npm install && npm run build`
+   - **Start Command**: `npm start`
    - **Environment Variables**: 添加 `DEEPSEEK_API_KEY`，值为你的 DeepSeek Key
 5. 点击 "Create Web Service"，等待部署完成
 
@@ -76,9 +80,17 @@ npm run dev
 
 部署完成后：
 
-1. 复制 Render 后端的域名（类似 `xxx.onrender.com`）
-2. 在 Vercel 前端项目的环境变量中添加 `VITE_API_BASE_URL`，值为后端地址
-3. Vercel 会自动重新部署
+1. 复制 Render 后端的域名（类似 `https://xxx.onrender.com`）
+2. 打开 Vercel 前端项目 → Settings → Environment Variables
+3. 添加变量：
+   - **Key**: `VITE_API_BASE_URL`
+   - **Value**: 你的 Render 后端域名（如 `https://qiuzhi-pailei.onrender.com`）
+   - **Environment**: 勾选 Production 和 Preview
+4. 保存后 Vercel 会自动重新部署
+
+### 快捷部署
+
+项目已包含 `render.yaml` 和 `vercel.json` 配置文件，点击仓库上的 "Deploy to Vercel" 或 "Deploy to Render" 按钮即可快速部署。
 
 ## 项目结构
 
